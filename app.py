@@ -1,29 +1,22 @@
 import streamlit as st
-import cv2
 from ultralytics import YOLO
+from PIL import Image
+import numpy as np
 
 st.title("AI Object Detection System")
 
 model = YOLO("yolov8n.pt")
 
-run = st.checkbox('Start Camera')
+uploaded_file = st.file_uploader("Upload Image", type=["jpg","png","jpeg"])
 
-FRAME_WINDOW = st.image([])
+if uploaded_file is not None:
+    image = Image.open(uploaded_file)
+    img_array = np.array(image)
 
-cap = cv2.VideoCapture(0, cv2.CAP_AVFOUNDATION)
+    results = model(img_array)
 
-while run:
-    ret, frame = cap.read()
-    if not ret:
-        st.write("Camera not working")
-        break
-
-    results = model(frame)
     annotated_frame = results[0].plot()
-    annotated_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
 
-    FRAME_WINDOW.image(annotated_frame)
-
-cap.release()
+    st.image(annotated_frame, caption="Detected Image")
 #paste command
 # streamlit run app.py
